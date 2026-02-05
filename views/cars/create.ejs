@@ -1,39 +1,166 @@
-<div class="container mt-4">
-  <div class="card card-custom p-4 col-md-6 mx-auto">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Car - Car Booking System</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-light">
+
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold fs-5" href="/dashboard">
+        <i class="fas fa-car"></i> Car Booking System
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link" href="/dashboard">
+            <i class="fas fa-home"></i> Dashboard
+          </a>
+          <a class="nav-link active" href="/ui/cars">
+            <i class="fas fa-car"></i> Cars
+          </a>
+          <a class="nav-link" href="/ui/bookings">
+            <i class="fas fa-calendar-alt"></i> Bookings
+          </a>
+          <% if (user && user.role === 'admin') { %>
+            <a class="nav-link" href="/ui/users">
+              <i class="fas fa-users"></i> Users
+            </a>
+          <% } %>
+          <div class="nav-divider" style="width: 1px; height: 25px; background: rgba(255,255,255,0.3); margin: 0 15px;"></div>
+          <a class="nav-link" href="/auth/logout" style="color: #ff6b6b !important;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container" style="max-width: 700px;">
+    <!-- Header -->
     <h3 class="mb-4">
       <i class="fas fa-plus-circle"></i> Add New Car
     </h3>
 
-    <form method="post" action="/api/cars">
-      <div class="mb-3">
-        <label class="form-label">
-          <i class="fas fa-tag"></i> Brand
-        </label>
-        <input type="text" name="brand" class="form-control" placeholder="e.g., Toyota" required />
+    <!-- Form Card -->
+    <div class="card card-custom shadow-lg border-0">
+      <div style="background: linear-gradient(135deg, #0066cc 0%, #1a7fd9 100%); color: white; padding: 30px;">
+        <h4 style="margin: 0;">
+          <i class="fas fa-car me-2"></i> New Vehicle
+        </h4>
+        <p style="margin: 5px 0 0 0; opacity: 0.9;">Add a new car to your fleet</p>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">
-          <i class="fas fa-car"></i> Model
-        </label>
-        <input type="text" name="model" class="form-control" placeholder="e.g., Camry" required />
-      </div>
+      <div class="card-body p-4">
+        <form method="post" action="/api/cars">
+          <!-- Brand -->
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <i class="fas fa-tag me-2" style="color: #0066cc;"></i> Brand
+            </label>
+            <input 
+              type="text" 
+              name="brand" 
+              class="form-control" 
+              placeholder="e.g., Toyota, Honda, BMW" 
+              required 
+            />
+          </div>
 
-      <div class="mb-3">
-        <label class="form-label">
-          <i class="fas fa-dollar-sign"></i> Price Per Day
-        </label>
-        <input type="number" name="pricePerDay" class="form-control" placeholder="e.g., 50" min="1" step="0.01" required />
-      </div>
+          <!-- Model -->
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <i class="fas fa-car me-2" style="color: #0066cc;"></i> Model
+            </label>
+            <input 
+              type="text" 
+              name="model" 
+              class="form-control" 
+              placeholder="e.g., Camry, Civic, X5" 
+              required 
+            />
+          </div>
 
-      <div class="d-flex gap-2 justify-content-end">
-        <a href="/ui/cars" class="btn btn-secondary">
-          <i class="fas fa-times"></i> Cancel
-        </a>
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save"></i> Create Car
-        </button>
+          <!-- Description -->
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <i class="fas fa-align-left me-2" style="color: #0066cc;"></i> Description
+            </label>
+            <textarea 
+              name="description" 
+              class="form-control" 
+              rows="3"
+              placeholder="Add a description for this vehicle..."
+            ></textarea>
+          </div>
+
+          <!-- Image URL -->
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <i class="fas fa-image me-2" style="color: #0066cc;"></i> Image URL
+            </label>
+            <input 
+              type="url" 
+              name="imageUrl" 
+              class="form-control" 
+              placeholder="https://example.com/car-image.jpg"
+            />
+          </div>
+
+          <!-- Price -->
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <i class="fas fa-dollar-sign me-2" style="color: #0066cc;"></i> Price Per Day
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-light" style="border: 2px solid #e0e0e0;">đ</span>
+              <input 
+                type="number" 
+                name="pricePerDay" 
+                class="form-control" 
+                placeholder="e.g., 500000" 
+                min="1" 
+                step="1" 
+                required 
+              />
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div style="display: flex; gap: 12px; margin-top: 30px;">
+            <a href="/ui/cars" class="btn btn-secondary flex-grow-1">
+              <i class="fas fa-times me-2"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary flex-grow-1">
+              <i class="fas fa-save me-2"></i> Add Car
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
-</div>
+</main>
+
+<footer class="bg-dark text-white text-center py-4 mt-5">
+  <p class="mb-0"><i class="fas fa-copyright"></i> 2026 – SDN302 Car Booking System</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

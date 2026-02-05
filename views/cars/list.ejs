@@ -1,29 +1,92 @@
 <div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>🚘 Car List</h3>
-    <a href="/ui/cars/create" class="btn btn-primary">
-      ➕ Add Car
-    </a>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>
+      <i class="fas fa-car"></i> Available Cars
+    </h3>
+    <% if (user && user.role === 'admin') { %>
+      <a href="/ui/cars/create" class="btn btn-primary">
+        <i class="fas fa-plus-circle me-2"></i> Add New Car
+      </a>
+    <% } %>
   </div>
 
-  <div class="card card-custom">
-    <table class="table table-hover mb-0">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Brand</th>
-          <th>Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% cars.forEach(car => { %>
-          <tr>
-            <td><%= car.model %></td>
-            <td><%= car.brand %></td>
-            <td>$<%= car.pricePerDay %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+  <!-- Cars Grid -->
+  <div class="row">
+    <% if (cars && cars.length > 0) { %>
+      <% cars.forEach(car => { %>
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="car-card" onclick="window.location.href='/ui/cars/<%= car._id %>';">
+            <!-- Car Image -->
+            <img src="<%= car.imageUrl || 'https://via.placeholder.com/400x300?text=Car+Image' %>" 
+                 alt="<%= car.brand %> <%= car.model %>" 
+                 class="car-card-img"
+            />
+            
+            <!-- Car Info -->
+            <div class="car-card-body">
+              <div class="car-brand">
+                <i class="fas fa-tag me-1"></i> <%= car.brand %>
+              </div>
+              <h5 class="car-model"><%= car.model %></h5>
+              
+              <p class="car-description">
+                <% if (car.description) { %>
+                  <%= car.description %>
+                <% } else { %>
+                  <em style="color: #999;">No description available</em>
+                <% } %>
+              </p>
+
+              <div style="margin-top: auto; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                <div class="car-price">
+                  <%= car.pricePerDay %>đ
+                  <span class="car-price-unit">/ngày</span>
+                </div>
+                
+                <div style="display: flex; gap: 8px;">
+                  <button class="btn btn-primary flex-grow-1" onclick="event.stopPropagation(); viewDetail('<%= car._id %>');">
+                    <i class="fas fa-eye me-1"></i> View Details
+                  </button>
+                  <button class="btn btn-outline-primary flex-grow-1" onclick="event.stopPropagation(); bookCar('<%= car._id %>');">
+                    <i class="fas fa-calendar me-1"></i> Book
+                  </button>
+                </div>
+
+                <!-- Status Badge -->
+                <div style="margin-top: 12px; text-align: center;">
+                  <% if (car.status === 'AVAILABLE') { %>
+                    <span class="badge badge-confirmed">
+                      <i class="fas fa-check-circle me-1"></i> AVAILABLE
+                    </span>
+                  <% } else { %>
+                    <span class="badge badge-cancelled">
+                      <i class="fas fa-lock me-1"></i> BOOKED
+                    </span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <div class="col-12">
+        <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%); border-radius: 12px;">
+          <i class="fas fa-car" style="font-size: 3rem; color: #0066cc; margin-bottom: 20px; display: block;"></i>
+          <h4 style="color: #0066cc; margin-bottom: 10px;">No Cars Available</h4>
+          <p style="color: #666;">No cars are currently available for booking.</p>
+        </div>
+      </div>
+    <% } %>
   </div>
 </div>
+
+<script>
+function viewDetail(carId) {
+  window.location.href = `/ui/cars/${carId}`;
+}
+
+function bookCar(carId) {
+  window.location.href = `/ui/bookings/create?carId=${carId}`;
+}
+</script>

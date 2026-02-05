@@ -1,156 +1,201 @@
-<div class="container mt-5">
-  <div class="row">
-    <!-- Form Section -->
-    <div class="col-lg-8">
-      <div class="card card-custom shadow-lg border-0">
-        <div class="card-header bg-gradient-primary py-4">
-          <h3 class="mb-0 text-white">
-            <i class="fas fa-calendar-plus"></i> Create New Booking
-          </h3>
-          <p class="text-white mb-0 mt-2" style="font-size: 0.9rem;">Fill in the details to book your car</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Booking - Car Booking System</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-light">
+
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold fs-5" href="/dashboard">
+        <i class="fas fa-car"></i> Car Booking System
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link" href="/dashboard">
+            <i class="fas fa-home"></i> Dashboard
+          </a>
+          <a class="nav-link" href="/ui/cars">
+            <i class="fas fa-car"></i> Cars
+          </a>
+          <a class="nav-link active" href="/ui/bookings">
+            <i class="fas fa-calendar-alt"></i> Bookings
+          </a>
+          <% if (user && user.role === 'admin') { %>
+            <a class="nav-link" href="/ui/users">
+              <i class="fas fa-users"></i> Users
+            </a>
+          <% } %>
+          <div class="nav-divider" style="width: 1px; height: 25px; background: rgba(255,255,255,0.3); margin: 0 15px;"></div>
+          <a class="nav-link" href="/auth/logout" style="color: #ff6b6b !important;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
         </div>
+      </div>
+    </div>
+  </nav>
+</header>
 
-        <div class="card-body p-5">
-          <!-- Success Alert -->
-          <div id="successAlert" class="alert alert-success alert-dismissible fade show border-0" role="alert" style="display: none;">
-            <i class="fas fa-check-circle me-2"></i> <strong>Success!</strong> Booking created successfully.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<main>
+  <div class="container" style="max-width: 1000px;">
+    <!-- Header -->
+    <h3 class="mb-4">
+      <i class="fas fa-calendar-plus"></i> Create New Booking
+    </h3>
+
+    <div class="row">
+      <!-- Form Section -->
+      <div class="col-lg-8 mb-4">
+        <div class="card card-custom shadow-lg border-0">
+          <div style="background: linear-gradient(135deg, #0066cc 0%, #1a7fd9 100%); color: white; padding: 30px;">
+            <h4 style="margin: 0;">
+              <i class="fas fa-calendar-plus me-2"></i> Booking Details
+            </h4>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">Fill in your booking information</p>
           </div>
 
-          <!-- Error Alert -->
-          <div id="errorAlert" class="alert alert-danger alert-dismissible fade show border-0" role="alert" style="display: none;">
-            <i class="fas fa-exclamation-circle me-2"></i> <strong>Error!</strong> <span id="errorMessage"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-
-          <form id="bookingForm">
-            <div class="mb-4">
-              <label class="form-label fw-bold">
-                <i class="fas fa-user-circle text-primary"></i> Your User ID
-              </label>
-              <input type="text" id="userId" class="form-control form-control-lg" placeholder="Paste your user ID from login..." required />
-              <small class="form-text text-muted d-block mt-2">This is the token you received when logging in</small>
+          <div class="card-body p-4">
+            <!-- Alerts -->
+            <div id="successAlert" class="alert alert-success alert-dismissible fade show border-0" role="alert" style="display: none;">
+              <i class="fas fa-check-circle me-2"></i> <strong>Success!</strong> Booking created successfully.
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
-            <hr class="my-4" />
+            <div id="errorAlert" class="alert alert-danger alert-dismissible fade show border-0" role="alert" style="display: none;">
+              <i class="fas fa-exclamation-circle me-2"></i> <strong>Error!</strong> <span id="errorMessage"></span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
 
-            <div class="row">
-              <div class="col-lg-6 mb-4">
-                <label class="form-label fw-bold">
-                  <i class="fas fa-car-alt text-primary"></i> Select Car
+            <!-- Form -->
+            <form id="bookingForm">
+              <!-- Car Selection -->
+              <div class="form-group mb-4">
+                <label class="form-label">
+                  <i class="fas fa-car-alt me-2" style="color: #0066cc;"></i> Select a Car
                 </label>
-                <select id="carId" class="form-select form-select-lg" required>
+                <select id="carId" class="form-control" required>
                   <option value="">-- Choose a car --</option>
                 </select>
               </div>
 
-              <div class="col-lg-6 mb-4">
-                <label class="form-label fw-bold">
-                  <i class="fas fa-tag text-primary"></i> Price Per Day
+              <!-- Price Per Day -->
+              <div class="form-group mb-4">
+                <label class="form-label">
+                  <i class="fas fa-dollar-sign me-2" style="color: #0066cc;"></i> Price Per Day
                 </label>
-                <div class="input-group input-group-lg">
-                  <span class="input-group-text bg-light">VND</span>
+                <div class="input-group">
+                  <span class="input-group-text bg-light" style="border: 2px solid #e0e0e0;">VND</span>
                   <input type="number" id="pricePerDay" class="form-control" readonly style="background-color: #f8f9fa;" />
                 </div>
               </div>
-            </div>
 
-            <div class="row">
-              <div class="col-lg-6 mb-4">
-                <label class="form-label fw-bold">
-                  <i class="fas fa-calendar-check text-primary"></i> Start Date
-                </label>
-                <input type="date" id="startDate" class="form-control form-control-lg" required />
+              <!-- Dates -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group mb-4">
+                    <label class="form-label">
+                      <i class="fas fa-calendar-check me-2" style="color: #0066cc;"></i> Start Date
+                    </label>
+                    <input type="date" id="startDate" class="form-control" required />
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group mb-4">
+                    <label class="form-label">
+                      <i class="fas fa-calendar-times me-2" style="color: #0066cc;"></i> End Date
+                    </label>
+                    <input type="date" id="endDate" class="form-control" required />
+                  </div>
+                </div>
               </div>
 
-              <div class="col-lg-6 mb-4">
-                <label class="form-label fw-bold">
-                  <i class="fas fa-calendar-times text-primary"></i> End Date
+              <!-- Duration -->
+              <div class="form-group mb-4">
+                <label class="form-label">
+                  <i class="fas fa-hourglass me-2" style="color: #0066cc;"></i> Duration
                 </label>
-                <input type="date" id="endDate" class="form-control form-control-lg" required />
+                <input type="text" id="duration" class="form-control" readonly style="background-color: #f8f9fa;" placeholder="Select dates to calculate" />
               </div>
-            </div>
 
-            <div class="mb-4">
-              <label class="form-label fw-bold">
-                <i class="fas fa-calculator text-primary"></i> Duration
-              </label>
-              <input type="text" id="duration" class="form-control form-control-lg" readonly style="background-color: #f8f9fa;" placeholder="Select dates to calculate" />
-            </div>
-
-            <div class="d-flex gap-2 justify-content-end mt-5">
-              <a href="/ui/bookings" class="btn btn-lg btn-secondary">
-                <i class="fas fa-times me-2"></i> Cancel
-              </a>
-              <button type="submit" class="btn btn-lg btn-primary">
-                <i class="fas fa-check me-2"></i> Create Booking
-              </button>
-            </div>
-          </form>
+              <!-- Buttons -->
+              <div style="display: flex; gap: 12px; margin-top: 30px;">
+                <a href="/ui/bookings" class="btn btn-secondary flex-grow-1">
+                  <i class="fas fa-times me-2"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                  <i class="fas fa-check me-2"></i> Create Booking
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Summary Section -->
-    <div class="col-lg-4">
-      <div class="card card-custom shadow-lg border-0 sticky-top" style="top: 20px;">
-        <div class="card-header bg-gradient-success py-3">
-          <h5 class="mb-0 text-white">
-            <i class="fas fa-receipt"></i> Booking Summary
-          </h5>
-        </div>
-
-        <div class="card-body p-4">
-          <div class="summary-item mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="text-muted">
-                <i class="fas fa-car-side text-primary me-2"></i> Car:
-              </span>
-              <strong id="summaryCarBrand">Not selected</strong>
-            </div>
+      <!-- Summary Section -->
+      <div class="col-lg-4">
+        <div class="card card-custom shadow-lg border-0" style="position: sticky; top: 20px;">
+          <div style="background: linear-gradient(135deg, #1a7fd9 0%, #00a8e8 100%); color: white; padding: 20px;">
+            <h5 style="margin: 0;">
+              <i class="fas fa-receipt me-2"></i> Booking Summary
+            </h5>
           </div>
 
-          <div class="summary-item mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="text-muted">
-                <i class="fas fa-calendar-days text-primary me-2"></i> Duration:
-              </span>
-              <strong id="summaryDays">0 days</strong>
+          <div class="card-body p-4">
+            <!-- Car Info -->
+            <div style="margin-bottom: 20px;">
+              <p style="margin: 0; color: #999; font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Selected Car</p>
+              <p id="summaryCarName" style="margin: 8px 0 0 0; font-size: 1.2rem; font-weight: 800; color: #0066cc;">
+                Not selected
+              </p>
             </div>
-          </div>
 
-          <div class="summary-item mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="text-muted">
-                <i class="fas fa-dollar-sign text-primary me-2"></i> Per Day:
-              </span>
-              <strong id="summaryPrice">0VND</strong>
+            <!-- Details -->
+            <div style="background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: #666; font-weight: 600;">Duration:</span>
+                <strong id="summaryDays" style="color: #0066cc;">0 days</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #666; font-weight: 600;">Price/Day:</span>
+                <strong id="summaryPrice" style="color: #0066cc;">0đ</strong>
+              </div>
             </div>
-          </div>
 
-          <hr class="my-4" />
-
-          <div class="summary-total">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="fw-bold fs-6">Total Price:</span>
-              <span class="fw-bold fs-5 text-primary" id="summaryTotal">0 VND</span>
+            <!-- Total -->
+            <div style="background: linear-gradient(135deg, #0066cc 0%, #1a7fd9 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+              <p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">Total Price</p>
+              <p id="summaryTotal" style="margin: 10px 0 0 0; font-size: 2rem; font-weight: 800;">
+                0đ
+              </p>
             </div>
-          </div>
-
-          <div class="alert alert-info mb-0">
-            <i class="fas fa-info-circle me-2"></i>
-            <small>Select car and dates to see the total price</small>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</main>
 
-      </div>
-    </div>
-  </div>
-</div>
+<footer class="bg-dark text-white text-center py-4 mt-5">
+  <p class="mb-0"><i class="fas fa-copyright"></i> 2026 – SDN302 Car Booking System</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 // Load cars
@@ -163,7 +208,7 @@ async function loadCars() {
     cars.forEach(car => {
       const option = document.createElement('option');
       option.value = car._id;
-      option.textContent = `${car.brand} ${car.model} - ${car.pricePerDay}VND/day`;
+      option.textContent = `${car.brand} ${car.model} - ${car.pricePerDay}đ/day`;
       option.dataset.price = car.pricePerDay;
       option.dataset.brand = car.brand;
       option.dataset.model = car.model;
@@ -183,13 +228,15 @@ function updateSummary() {
   const pricePerDay = parseFloat(selectedOption.dataset.price) || 0;
   
   // Update price per day
-  document.getElementById('pricePerDay').value = `${pricePerDay} VND`;
-  document.getElementById('summaryPrice').textContent = `${pricePerDay} VND`;
+  document.getElementById('pricePerDay').value = `${pricePerDay}`;
+  document.getElementById('summaryPrice').textContent = `${pricePerDay}đ`;
   
   // Update car name
   if (carSelect.value) {
     const carName = `${selectedOption.dataset.brand} ${selectedOption.dataset.model}`;
-    document.getElementById('summaryCarBrand').textContent = carName;
+    document.getElementById('summaryCarName').textContent = carName;
+  } else {
+    document.getElementById('summaryCarName').textContent = 'Not selected';
   }
   
   // Calculate total
@@ -199,11 +246,11 @@ function updateSummary() {
     
     document.getElementById('duration').value = `${days} day${days > 1 ? 's' : ''}`;
     document.getElementById('summaryDays').textContent = `${days} day${days > 1 ? 's' : ''}`;
-    document.getElementById('summaryTotal').textContent = `${total.toFixed(2)}`;
+    document.getElementById('summaryTotal').textContent = `${total.toLocaleString('vi-VN')}đ`;
   } else {
     document.getElementById('duration').value = '';
     document.getElementById('summaryDays').textContent = '0 days';
-    document.getElementById('summaryTotal').textContent = '0 VND';
+    document.getElementById('summaryTotal').textContent = '0đ';
   }
 }
 
@@ -216,7 +263,7 @@ document.getElementById('endDate').addEventListener('change', updateSummary);
 document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const userId = document.getElementById('userId').value.trim();
+  const userId = '<%= user.id %>';
   const carId = document.getElementById('carId').value;
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
@@ -227,7 +274,7 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   const days = Math.floor((endDateObj - startDateObj) / (1000 * 60 * 60 * 24)) + 1;
   const totalPrice = days * pricePerDay;
 
-  if (!userId || !carId || !startDate || !endDate || !totalPrice) {
+  if (!carId || !startDate || !endDate || !totalPrice) {
     document.getElementById('errorMessage').textContent = 'Please fill all fields correctly';
     document.getElementById('errorAlert').style.display = 'block';
     return;
@@ -269,3 +316,5 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
 // Load cars on page load
 loadCars();
 </script>
+</body>
+</html>

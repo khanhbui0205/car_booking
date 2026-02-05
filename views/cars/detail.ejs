@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= car.brand %> <%= car.model %> - Car Details</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-light">
+
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold fs-5" href="/dashboard">
+        <i class="fas fa-car"></i> Car Booking System
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link" href="/dashboard">
+            <i class="fas fa-home"></i> Dashboard
+          </a>
+          <a class="nav-link active" href="/ui/cars">
+            <i class="fas fa-car"></i> Cars
+          </a>
+          <a class="nav-link" href="/ui/bookings">
+            <i class="fas fa-calendar-alt"></i> Bookings
+          </a>
+          <% if (user && user.role === 'admin') { %>
+            <a class="nav-link" href="/ui/users">
+              <i class="fas fa-users"></i> Users
+            </a>
+          <% } %>
+          <div class="nav-divider" style="width: 1px; height: 25px; background: rgba(255,255,255,0.3); margin: 0 15px;"></div>
+          <a class="nav-link" href="/auth/logout" style="color: #ff6b6b !important;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container" style="max-width: 1000px;">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb" style="background: transparent; padding: 0; margin: 0;">
+        <li class="breadcrumb-item"><a href="/dashboard" style="color: #0066cc; text-decoration: none;">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/ui/cars" style="color: #0066cc; text-decoration: none;">Cars</a></li>
+        <li class="breadcrumb-item active"><%= car.brand %> <%= car.model %></li>
+      </ol>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="row">
+      <!-- Image Section -->
+      <div class="col-lg-5 mb-4">
+        <div class="card border-0 shadow-lg" style="overflow: hidden;">
+          <img 
+            src="<%= car.imageUrl || 'https://via.placeholder.com/500x400?text=' + car.brand + '+' + car.model %>" 
+            alt="<%= car.brand %> <%= car.model %>" 
+            class="card-img-top" 
+            style="height: 400px; object-fit: cover;"
+          />
+          
+          <!-- Status Badge -->
+          <div style="position: absolute; top: 20px; right: 20px;">
+            <% if (car.status === 'AVAILABLE') { %>
+              <span class="badge badge-confirmed" style="font-size: 1rem; padding: 10px 15px;">
+                <i class="fas fa-check-circle me-2"></i> AVAILABLE
+              </span>
+            <% } else { %>
+              <span class="badge badge-cancelled" style="font-size: 1rem; padding: 10px 15px;">
+                <i class="fas fa-lock me-2"></i> BOOKED
+              </span>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details Section -->
+      <div class="col-lg-7">
+        <!-- Header -->
+        <div class="mb-4">
+          <span style="color: #0066cc; font-weight: 800; text-transform: uppercase; font-size: 0.9rem;">
+            <i class="fas fa-tag me-1"></i> <%= car.brand %>
+          </span>
+          <h1 style="font-size: 2.5rem; font-weight: 800; color: #1a1a1a; margin: 10px 0 20px 0;">
+            <%= car.model %>
+          </h1>
+        </div>
+
+        <!-- Price -->
+        <div style="background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid #0066cc;">
+          <p style="margin: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; font-weight: 600;">Daily Rate</p>
+          <p style="margin: 5px 0 0 0; font-size: 2rem; font-weight: 800; color: #0066cc;">
+            <%= car.pricePerDay %>đ
+            <span style="font-size: 1rem; font-weight: 600; color: #666;">/ngày</span>
+          </p>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 12px;">
+            <i class="fas fa-info-circle me-2"></i> Description
+          </h5>
+          <p style="color: #666; line-height: 1.8; font-size: 1rem;">
+            <% if (car.description) { %>
+              <%= car.description %>
+            <% } else { %>
+              <em style="color: #999;">No description available for this vehicle.</em>
+            <% } %>
+          </p>
+        </div>
+
+        <!-- Details -->
+        <div class="mb-4">
+          <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 12px;">
+            <i class="fas fa-car-side me-2"></i> Vehicle Information
+          </h5>
+          
+          <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
+            <div class="detail-row">
+              <label>
+                <i class="fas fa-cube me-2" style="color: #0066cc;"></i> Brand
+              </label>
+              <span><%= car.brand %></span>
+            </div>
+            
+            <div class="detail-row">
+              <label>
+                <i class="fas fa-car me-2" style="color: #0066cc;"></i> Model
+              </label>
+              <span><%= car.model %></span>
+            </div>
+            
+            <div class="detail-row">
+              <label>
+                <i class="fas fa-dollar-sign me-2" style="color: #0066cc;"></i> Price Per Day
+              </label>
+              <span style="color: #0066cc; font-weight: 800; font-size: 1.1rem;"><%= car.pricePerDay %>đ</span>
+            </div>
+            
+            <div class="detail-row">
+              <label>
+                <i class="fas fa-shield-alt me-2" style="color: #0066cc;"></i> Status
+              </label>
+              <span>
+                <% if (car.status === 'AVAILABLE') { %>
+                  <span class="badge badge-confirmed">
+                    <i class="fas fa-check-circle me-1"></i> AVAILABLE
+                  </span>
+                <% } else { %>
+                  <span class="badge badge-cancelled">
+                    <i class="fas fa-lock me-1"></i> BOOKED
+                  </span>
+                <% } %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; margin-top: 30px;">
+          <a href="/ui/cars" class="btn btn-secondary flex-grow-1">
+            <i class="fas fa-arrow-left me-2"></i> Back to Cars
+          </a>
+          <% if (car.status === 'AVAILABLE') { %>
+            <a href="/ui/bookings/create?carId=<%= car._id %>" class="btn btn-primary flex-grow-1">
+              <i class="fas fa-calendar-plus me-2"></i> Book This Car
+            </a>
+          <% } else { %>
+            <button class="btn btn-secondary flex-grow-1" disabled>
+              <i class="fas fa-lock me-2"></i> Currently Booked
+            </button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Cars -->
+    <div class="mt-5 pt-5" style="border-top: 2px solid #e0e0e0;">
+      <h3 style="color: #0066cc; font-weight: 800; margin-bottom: 25px;">
+        <i class="fas fa-similar me-2"></i> Other Available Cars
+      </h3>
+      <div class="row">
+        <% if (relatedCars && relatedCars.length > 0) { %>
+          <% relatedCars.forEach(relatedCar => { %>
+            <div class="col-md-6 col-lg-4 mb-4">
+              <div class="car-card" onclick="window.location.href='/ui/cars/<%= relatedCar._id %>';">
+                <img src="<%= relatedCar.imageUrl || 'https://via.placeholder.com/400x300?text=Car' %>" 
+                     alt="<%= relatedCar.brand %> <%= relatedCar.model %>" 
+                     class="car-card-img"
+                />
+                <div class="car-card-body">
+                  <div class="car-brand"><%= relatedCar.brand %></div>
+                  <h5 class="car-model"><%= relatedCar.model %></h5>
+                  <div class="car-price">
+                    <%= relatedCar.pricePerDay %>đ
+                    <span class="car-price-unit">/ngày</span>
+                  </div>
+                  <a href="/ui/cars/<%= relatedCar._id %>" class="btn btn-primary btn-sm w-100">
+                    <i class="fas fa-eye me-1"></i> View
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="col-12">
+            <p style="text-align: center; color: #999;">No other cars available</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-4 mt-5">
+  <p class="mb-0"><i class="fas fa-copyright"></i> 2026 – SDN302 Car Booking System</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
