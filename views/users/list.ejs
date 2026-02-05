@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <h3 class="mb-3">👥 User Management</h3>
+
+  <div class="card card-custom">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(u => { %>
+          <tr>
+            <td><strong><%= u.name %></strong></td>
+            <td><%= u.email %></td>
+            <td>
+              <% if (u.role === "admin") { %>
+                <span class="badge badge-confirmed">ADMIN</span>
+              <% } else { %>
+                <span class="badge badge-active">USER</span>
+              <% } %>
+            </td>
+            <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

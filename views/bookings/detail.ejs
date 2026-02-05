@@ -1,0 +1,98 @@
+<div class="container mt-4">
+  <div class="card card-custom p-4">
+    <h3 class="mb-4">📋 Booking Details</h3>
+    
+    <div class="detail-row">
+      <label>👤 User:</label>
+      <span><%= booking.userId.name %></span>
+    </div>
+    
+    <div class="detail-row">
+      <label>🚗 Car:</label>
+      <span><%= booking.carId.brand %> <%= booking.carId.model %></span>
+    </div>
+    
+    <div class="detail-row">
+      <label>💰 Price per Day:</label>
+      <span>$<%= booking.carId.pricePerDay %></span>
+    </div>
+    
+    <div class="detail-row">
+      <label>📅 Start Date:</label>
+      <span><%= new Date(booking.startDate).toLocaleDateString() %></span>
+    </div>
+    
+    <div class="detail-row">
+      <label>📅 End Date:</label>
+      <span><%= new Date(booking.endDate).toLocaleDateString() %></span>
+    </div>
+    
+    <div class="detail-row">
+      <label>💵 Total Price:</label>
+      <span class="price-total">$<%= booking.totalPrice %></span>
+    </div>
+    
+    <div class="detail-row">
+      <label>Status:</label>
+      <span>
+        <% if (booking.status === "ACTIVE") { %>
+          <span class="badge badge-active">ACTIVE</span>
+        <% } else if (booking.status === "CONFIRMED") { %>
+          <span class="badge badge-confirmed">CONFIRMED</span>
+        <% } else { %>
+          <span class="badge badge-cancelled">CANCELLED</span>
+        <% } %>
+      </span>
+    </div>
+    
+    <div class="mt-4 d-flex gap-2 justify-content-end">
+      <a href="/ui/bookings" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Bookings
+      </a>
+      
+      <% if (booking.status === "ACTIVE") { %>
+        <button id="confirmBtn" class="btn btn-success" onclick="confirmBooking('<%= booking._id %>')">
+          <i class="fas fa-check-circle"></i> Confirm Booking
+        </button>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<script>
+async function confirmBooking(bookingId) {
+  if (!confirm('Are you sure you want to confirm this booking?')) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token') || prompt('Enter your user ID/token:');
+    
+    if (!token) {
+      alert('Token required to confirm booking');
+      return;
+    }
+
+    const response = await fetch(`/api/bookings/${bookingId}/confirm`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      alert('Booking confirmed successfully!');
+      // Hide confirm button
+      document.getElementById('confirmBtn').style.display = 'none';
+      // Update status badge
+      location.reload();
+    } else {
+      const error = await response.json();
+      alert('Error: ' + (error.message || 'Failed to confirm booking'));
+    }
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+</script>

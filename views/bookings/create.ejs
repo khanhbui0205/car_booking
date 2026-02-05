@@ -1,0 +1,271 @@
+<div class="container mt-5">
+  <div class="row">
+    <!-- Form Section -->
+    <div class="col-lg-8">
+      <div class="card card-custom shadow-lg border-0">
+        <div class="card-header bg-gradient-primary py-4">
+          <h3 class="mb-0 text-white">
+            <i class="fas fa-calendar-plus"></i> Create New Booking
+          </h3>
+          <p class="text-white mb-0 mt-2" style="font-size: 0.9rem;">Fill in the details to book your car</p>
+        </div>
+
+        <div class="card-body p-5">
+          <!-- Success Alert -->
+          <div id="successAlert" class="alert alert-success alert-dismissible fade show border-0" role="alert" style="display: none;">
+            <i class="fas fa-check-circle me-2"></i> <strong>Success!</strong> Booking created successfully.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+
+          <!-- Error Alert -->
+          <div id="errorAlert" class="alert alert-danger alert-dismissible fade show border-0" role="alert" style="display: none;">
+            <i class="fas fa-exclamation-circle me-2"></i> <strong>Error!</strong> <span id="errorMessage"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+
+          <form id="bookingForm">
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                <i class="fas fa-user-circle text-primary"></i> Your User ID
+              </label>
+              <input type="text" id="userId" class="form-control form-control-lg" placeholder="Paste your user ID from login..." required />
+              <small class="form-text text-muted d-block mt-2">This is the token you received when logging in</small>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="row">
+              <div class="col-lg-6 mb-4">
+                <label class="form-label fw-bold">
+                  <i class="fas fa-car-alt text-primary"></i> Select Car
+                </label>
+                <select id="carId" class="form-select form-select-lg" required>
+                  <option value="">-- Choose a car --</option>
+                </select>
+              </div>
+
+              <div class="col-lg-6 mb-4">
+                <label class="form-label fw-bold">
+                  <i class="fas fa-tag text-primary"></i> Price Per Day
+                </label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-light">VND</span>
+                  <input type="number" id="pricePerDay" class="form-control" readonly style="background-color: #f8f9fa;" />
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-lg-6 mb-4">
+                <label class="form-label fw-bold">
+                  <i class="fas fa-calendar-check text-primary"></i> Start Date
+                </label>
+                <input type="date" id="startDate" class="form-control form-control-lg" required />
+              </div>
+
+              <div class="col-lg-6 mb-4">
+                <label class="form-label fw-bold">
+                  <i class="fas fa-calendar-times text-primary"></i> End Date
+                </label>
+                <input type="date" id="endDate" class="form-control form-control-lg" required />
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                <i class="fas fa-calculator text-primary"></i> Duration
+              </label>
+              <input type="text" id="duration" class="form-control form-control-lg" readonly style="background-color: #f8f9fa;" placeholder="Select dates to calculate" />
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end mt-5">
+              <a href="/ui/bookings" class="btn btn-lg btn-secondary">
+                <i class="fas fa-times me-2"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-lg btn-primary">
+                <i class="fas fa-check me-2"></i> Create Booking
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="col-lg-4">
+      <div class="card card-custom shadow-lg border-0 sticky-top" style="top: 20px;">
+        <div class="card-header bg-gradient-success py-3">
+          <h5 class="mb-0 text-white">
+            <i class="fas fa-receipt"></i> Booking Summary
+          </h5>
+        </div>
+
+        <div class="card-body p-4">
+          <div class="summary-item mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">
+                <i class="fas fa-car-side text-primary me-2"></i> Car:
+              </span>
+              <strong id="summaryCarBrand">Not selected</strong>
+            </div>
+          </div>
+
+          <div class="summary-item mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">
+                <i class="fas fa-calendar-days text-primary me-2"></i> Duration:
+              </span>
+              <strong id="summaryDays">0 days</strong>
+            </div>
+          </div>
+
+          <div class="summary-item mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">
+                <i class="fas fa-dollar-sign text-primary me-2"></i> Per Day:
+              </span>
+              <strong id="summaryPrice">0VND</strong>
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <div class="summary-total">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-bold fs-6">Total Price:</span>
+              <span class="fw-bold fs-5 text-primary" id="summaryTotal">0 VND</span>
+            </div>
+          </div>
+
+          <div class="alert alert-info mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            <small>Select car and dates to see the total price</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Load cars
+async function loadCars() {
+  try {
+    const response = await fetch('/api/cars');
+    const cars = await response.json();
+    const select = document.getElementById('carId');
+    select.innerHTML = '<option value="">-- Choose a car --</option>';
+    cars.forEach(car => {
+      const option = document.createElement('option');
+      option.value = car._id;
+      option.textContent = `${car.brand} ${car.model} - ${car.pricePerDay}VND/day`;
+      option.dataset.price = car.pricePerDay;
+      option.dataset.brand = car.brand;
+      option.dataset.model = car.model;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error loading cars:', error);
+  }
+}
+
+// Calculate and update summary
+function updateSummary() {
+  const carSelect = document.getElementById('carId');
+  const startDate = new Date(document.getElementById('startDate').value);
+  const endDate = new Date(document.getElementById('endDate').value);
+  const selectedOption = carSelect.options[carSelect.selectedIndex];
+  const pricePerDay = parseFloat(selectedOption.dataset.price) || 0;
+  
+  // Update price per day
+  document.getElementById('pricePerDay').value = `${pricePerDay} VND`;
+  document.getElementById('summaryPrice').textContent = `${pricePerDay} VND`;
+  
+  // Update car name
+  if (carSelect.value) {
+    const carName = `${selectedOption.dataset.brand} ${selectedOption.dataset.model}`;
+    document.getElementById('summaryCarBrand').textContent = carName;
+  }
+  
+  // Calculate total
+  if (startDate && endDate && startDate < endDate && pricePerDay > 0) {
+    const days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    const total = days * pricePerDay;
+    
+    document.getElementById('duration').value = `${days} day${days > 1 ? 's' : ''}`;
+    document.getElementById('summaryDays').textContent = `${days} day${days > 1 ? 's' : ''}`;
+    document.getElementById('summaryTotal').textContent = `${total.toFixed(2)}`;
+  } else {
+    document.getElementById('duration').value = '';
+    document.getElementById('summaryDays').textContent = '0 days';
+    document.getElementById('summaryTotal').textContent = '0 VND';
+  }
+}
+
+// Event listeners
+document.getElementById('carId').addEventListener('change', updateSummary);
+document.getElementById('startDate').addEventListener('change', updateSummary);
+document.getElementById('endDate').addEventListener('change', updateSummary);
+
+// Handle form submit
+document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const userId = document.getElementById('userId').value.trim();
+  const carId = document.getElementById('carId').value;
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const pricePerDay = parseFloat(document.getElementById('pricePerDay').value) || 0;
+  
+  const startDateObj = new Date(startDate);
+  const endDateObj = new Date(endDate);
+  const days = Math.floor((endDateObj - startDateObj) / (1000 * 60 * 60 * 24)) + 1;
+  const totalPrice = days * pricePerDay;
+
+  if (!userId || !carId || !startDate || !endDate || !totalPrice) {
+    document.getElementById('errorMessage').textContent = 'Please fill all fields correctly';
+    document.getElementById('errorAlert').style.display = 'block';
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userId}`
+      },
+      body: JSON.stringify({
+        carId,
+        startDate,
+        endDate,
+        totalPrice
+      })
+    });
+
+    if (response.ok) {
+      document.getElementById('successAlert').style.display = 'block';
+      document.getElementById('bookingForm').reset();
+      updateSummary();
+      
+      setTimeout(() => {
+        window.location.href = '/ui/bookings';
+      }, 2000);
+    } else {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create booking');
+    }
+  } catch (error) {
+    document.getElementById('errorMessage').textContent = error.message;
+    document.getElementById('errorAlert').style.display = 'block';
+  }
+});
+
+// Load cars on page load
+loadCars();
+</script>

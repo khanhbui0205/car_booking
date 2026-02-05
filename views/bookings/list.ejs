@@ -1,0 +1,39 @@
+<div class="container mt-4">
+  <h3 class="mb-3">📋 Booking List</h3>
+
+  <div class="card card-custom">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Car</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% bookings.forEach(b => { %>
+          <tr>
+            <td><%= b.userId.name %></td>
+            <td><%= b.carId.model %></td>
+            <td>
+              <% if (b.status === "ACTIVE") { %>
+                <span class="badge badge-active">ACTIVE</span>
+              <% } else if (b.status === "CONFIRMED") { %>
+                <span class="badge badge-confirmed">CONFIRMED</span>
+              <% } else { %>
+                <span class="badge badge-cancelled">CANCELLED</span>
+              <% } %>
+            </td>
+            <td>
+              <a href="/ui/bookings/<%= b._id %>" class="btn btn-sm btn-outline-primary">
+                Detail
+              </a>
+            </td>
+          </tr>
+        <% }) %>
+
+      </tbody>
+    </table>
+  </div>
+</div>
