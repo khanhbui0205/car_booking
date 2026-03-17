@@ -36,12 +36,17 @@ router.get("/", async (req, res) => {
 
 // Cars
 router.get("/cars", async (req, res) => {
-  const user = getCurrentUser(req);
-  const filter =
-    user.role === ROLE_ADMIN ? {} : user.role === ROLE_OWNER ? { ownerId: user.id } : { approvalStatus: "APPROVED" };
+  try {
+    const user = getCurrentUser(req);
+    const filter =
+      user.role === ROLE_ADMIN ? {} : user.role === ROLE_OWNER ? { ownerId: user.id } : { approvalStatus: "APPROVED" };
 
-  const cars = await Car.find(filter).sort({ createdAt: -1 });
-  res.render("cars/list", { cars, user });
+    const cars = await Car.find(filter).sort({ createdAt: -1 });
+    res.render("cars/list", { cars, user });
+  } catch (error) {
+    console.error("Error loading cars:", error);
+    return res.render("cars/list", { cars: [], user: getCurrentUser(req), error: error.message });
+  }
 });
 
 router.get("/cars/create", (req, res) => {
@@ -54,48 +59,58 @@ router.get("/cars/create", (req, res) => {
 });
 
 router.get("/cars/:id", async (req, res) => {
-  const user = getCurrentUser(req);
-  const car = await Car.findById(req.params.id);
-  if (!car) {
-    return res.status(404).send("Car not found");
+  try {
+    const user = getCurrentUser(req);
+    const car = await Car.findById(req.params.id);
+    if (!car) {
+      return res.status(404).send("Car not found");
+    }
+
+    const canViewCar =
+      user.role === ROLE_ADMIN ||
+      (user.role === ROLE_OWNER && String(car.ownerId) === String(user.id)) ||
+      (user.role === ROLE_CUSTOMER && car.approvalStatus === "APPROVED");
+
+    if (!canViewCar) {
+      return res.status(403).redirect("/ui/cars");
+    }
+
+    const relatedCars = await Car.find({
+      _id: { $ne: req.params.id },
+      approvalStatus: "APPROVED"
+    }).limit(3);
+
+    res.render("cars/detail", { car, relatedCars, user });
+  } catch (error) {
+    console.error("Error loading car detail:", error);
+    return res.status(500).send("Error loading car");
   }
-
-  const canViewCar =
-    user.role === ROLE_ADMIN ||
-    (user.role === ROLE_OWNER && String(car.ownerId) === String(user.id)) ||
-    (user.role === ROLE_CUSTOMER && car.approvalStatus === "APPROVED");
-
-  if (!canViewCar) {
-    return res.status(403).redirect("/ui/cars");
-  }
-
-  const relatedCars = await Car.find({
-    _id: { $ne: req.params.id },
-    approvalStatus: "APPROVED"
-  }).limit(3);
-
-  res.render("cars/detail", { car, relatedCars, user });
 });
 
 // Bookings
 router.get("/bookings", async (req, res) => {
-  const user = getCurrentUser(req);
-  let bookingsQuery;
+  try {
+    const user = getCurrentUser(req);
+    let bookingsQuery;
 
-  if (user.role === ROLE_ADMIN) {
-    bookingsQuery = Booking.find();
-  } else if (user.role === ROLE_OWNER) {
-    const ownerCars = await Car.find({ ownerId: user.id }).select("_id");
-    bookingsQuery = Booking.find({ carId: { $in: ownerCars.map((car) => car._id) } });
-  } else {
-    bookingsQuery = Booking.find({ userId: user.id });
+    if (user.role === ROLE_ADMIN) {
+      bookingsQuery = Booking.find();
+    } else if (user.role === ROLE_OWNER) {
+      const ownerCars = await Car.find({ ownerId: user.id }).select("_id");
+      bookingsQuery = Booking.find({ carId: { $in: ownerCars.map((car) => car._id) } });
+    } else {
+      bookingsQuery = Booking.find({ userId: user.id });
+    }
+
+    const bookings = await bookingsQuery
+      .populate("userId", "name email")
+      .populate("carId", "brand model pricePerDay ownerId");
+
+    res.render("bookings/list", { bookings, user });
+  } catch (error) {
+    console.error("Error loading bookings:", error);
+    return res.render("bookings/list", { bookings: [], user: getCurrentUser(req), error: error.message });
   }
-
-  const bookings = await bookingsQuery
-    .populate("userId")
-    .populate("carId");
-
-  res.render("bookings/list", { bookings, user });
 });
 
 router.get("/bookings/create", (req, res) => {
