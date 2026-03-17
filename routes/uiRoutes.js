@@ -2,7 +2,7 @@ const router = require("express").Router();
 const Car = require("../models/Car");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
-const { normalizeRole, ROLE_ADMIN, ROLE_CUSTOMER, ROLE_OWNER } = require("../utils/roles");
+const { normalizeRole, ROLE_ADMIN, ROLE_CUSTOMER } = require("../utils/roles");
 
 const getCurrentUser = (req) => {
   if (!req.session || !req.session.user) {
@@ -57,7 +57,7 @@ router.get("/cars", async (req, res) => {
 
 router.get("/cars/create", (req, res) => {
   const user = getCurrentUser(req);
-  if (![ROLE_ADMIN, ROLE_OWNER].includes(user.role)) {
+  if (user.role !== ROLE_ADMIN) {
     return res.status(403).redirect("/dashboard");
   }
 
@@ -74,7 +74,6 @@ router.get("/cars/:id", async (req, res) => {
 
     const canViewCar =
       user.role === ROLE_ADMIN ||
-      (user.role === ROLE_OWNER && String(car.ownerId) === String(user.id)) ||
       (user.role === ROLE_CUSTOMER && car.approvalStatus === "APPROVED");
 
     if (!canViewCar) {
@@ -151,23 +150,6 @@ router.get("/users", async (req, res) => {
 
   const users = await User.find();
   res.render("users/list", { users, user });
-});
-
-// DEBUG: Auto-approve all pending cars
-router.get("/debug/approve-cars", async (req, res) => {
-  try {
-    const result = await Car.updateMany(
-      { approvalStatus: "PENDING" },
-      { approvalStatus: "APPROVED" }
-    );
-    res.json({ 
-      message: `Approved ${result.modifiedCount} cars`,
-      totalCars: await Car.countDocuments(),
-      approvedCars: await Car.countDocuments({ approvalStatus: "APPROVED" })
-    });
-  } catch (error) {
-    res.json({ error: error.message });
-  }
 });
 
 module.exports = router;

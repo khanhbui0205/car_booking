@@ -278,11 +278,11 @@
           <label class="form-label">
             <i class="fas fa-shield-alt"></i> Account Type
           </label>
-          <select name="role" class="form-select" required>
+          <select name="role" class="form-select" required disabled>
             <option value="customer" selected>Customer</option>
-            <option value="owner">Owner</option>
           </select>
-          <small style="color: #666; margin-top: 5px; display: block;">Choose 'Customer' for booking or 'Owner' to manage your cars.</small>
+          <input type="hidden" name="role" value="customer">
+          <small style="color: #666; margin-top: 5px; display: block;">All new accounts are created as Customers.</small>
         </div>
 
         <button type="submit" class="login-btn">
