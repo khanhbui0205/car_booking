@@ -15,7 +15,7 @@ const carSchema = new mongoose.Schema(
     approvalStatus: {
       type: String,
       enum: ["PENDING", "APPROVED", "REJECTED"],
-      default: "PENDING"
+      default: "APPROVED"
     },
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,

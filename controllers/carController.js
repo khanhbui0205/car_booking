@@ -31,7 +31,7 @@ exports.createCar = async (req, res) => {
 
     if (req.user.role === ROLE_OWNER) {
       payload.ownerId = req.user.id;
-      payload.approvalStatus = "PENDING";
+      payload.approvalStatus = "APPROVED"; // Auto-approve for owner
     }
 
     if (req.user.role === ROLE_ADMIN) {

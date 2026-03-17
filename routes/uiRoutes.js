@@ -151,4 +151,21 @@ router.get("/users", async (req, res) => {
   res.render("users/list", { users, user });
 });
 
+// DEBUG: Auto-approve all pending cars
+router.get("/debug/approve-cars", async (req, res) => {
+  try {
+    const result = await Car.updateMany(
+      { approvalStatus: "PENDING" },
+      { approvalStatus: "APPROVED" }
+    );
+    res.json({ 
+      message: `Approved ${result.modifiedCount} cars`,
+      totalCars: await Car.countDocuments(),
+      approvedCars: await Car.countDocuments({ approvalStatus: "APPROVED" })
+    });
+  } catch (error) {
+    res.json({ error: error.message });
+  }
+});
+
 module.exports = router;
