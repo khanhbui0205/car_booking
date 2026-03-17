@@ -4,8 +4,7 @@ const { createAuthToken } = require("../utils/token");
 const {
   normalizeRole,
   ROLE_ADMIN,
-  ROLE_CUSTOMER,
-  ROLE_OWNER
+  ROLE_CUSTOMER
 } = require("../utils/roles");
 
 const isJsonRequest = (req) =>
@@ -24,10 +23,6 @@ const resolveRegisterRole = (requestedRole, requesterRole) => {
 
   if (normalizedRequestedRole === ROLE_ADMIN && normalizedRequesterRole !== ROLE_ADMIN) {
     return ROLE_CUSTOMER;
-  }
-
-  if (normalizedRequestedRole === ROLE_OWNER) {
-    return ROLE_OWNER;
   }
 
   return ROLE_CUSTOMER;

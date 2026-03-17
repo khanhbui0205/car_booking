@@ -69,8 +69,8 @@
         <div style="background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%); padding: 20px; border-radius: 12px;">
           <p style="margin: 0; color: #0066cc; font-weight: 600; font-size: 0.9rem;">USER ROLE</p>
           <p style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #004a99;">
-            <i class="<%= user.role === 'admin' ? 'fas fa-crown' : (user.role === 'owner' ? 'fas fa-car-side' : 'fas fa-user') %>"></i> 
-            <%= user.role === 'admin' ? 'Administrator' : (user.role === 'owner' ? 'Owner' : 'Customer') %>
+            <i class="<%= user.role === 'admin' ? 'fas fa-crown' : 'fas fa-user' %>"></i> 
+            <%= user.role === 'admin' ? 'Administrator' : 'Customer' %>
           </p>
         </div>
       </div>

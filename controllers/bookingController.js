@@ -1,7 +1,7 @@
 const bookingService = require("../services/bookingService");
 const mongoose = require("mongoose");
 const Booking = require("../models/Booking");
-const { ROLE_ADMIN, ROLE_CUSTOMER, ROLE_OWNER } = require("../utils/roles");
+const { ROLE_ADMIN, ROLE_CUSTOMER } = require("../utils/roles");
 
 const normalizeObjectId = (value) => String(value && value._id ? value._id : value);
 
@@ -12,11 +12,6 @@ const canAccessBooking = (role, userId, booking) => {
 
   if (role === ROLE_CUSTOMER) {
     return normalizeObjectId(booking.userId) === String(userId);
-  }
-
-  if (role === ROLE_OWNER) {
-    const ownerId = booking.carId?.ownerId;
-    return ownerId && normalizeObjectId(ownerId) === String(userId);
   }
 
   return false;
@@ -40,6 +35,9 @@ exports.createBooking = async (req, res) => {
 
 exports.confirmBooking = async (req, res) => {
   try {
+    if (req.user.role !== ROLE_ADMIN) {
+      return res.status(403).json({ message: "Forbidden: Admin only" });
+    }
     const contract = await bookingService.confirmBooking(req.params.id);
     res.json({ message: "Booking confirmed", contract });
   } catch (e) {
@@ -104,18 +102,8 @@ exports.getBookingHistory = async (req, res) => {
     return res.json(bookings);
   }
 
-  if (req.user.role === ROLE_OWNER) {
-    const bookings = await bookingService.getOwnerBookings(req.user.id);
-    return res.json(bookings);
-  }
-
   const bookings = await bookingService.getBookingsOfUser(req.user.id);
   return res.json(bookings);
-};
-
-exports.getOwnerBookings = async (req, res) => {
-  const bookings = await bookingService.getOwnerBookings(req.user.id);
-  res.json(bookings);
 };
 
 exports.getUserBookings = async (req, res) => {

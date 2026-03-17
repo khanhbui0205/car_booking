@@ -1,9 +1,8 @@
 const Car = require("../models/Car");
 const mongoose = require("mongoose");
-const { ROLE_ADMIN, ROLE_OWNER } = require("../utils/roles");
+const { ROLE_ADMIN } = require("../utils/roles");
 
-const OWNER_ALLOWED_FIELDS = ["brand", "model", "pricePerDay", "description", "imageUrl", "status"];
-const ADMIN_ALLOWED_FIELDS = [...OWNER_ALLOWED_FIELDS, "ownerId", "approvalStatus"];
+const ALLOWED_FIELDS = ["brand", "model", "pricePerDay", "description", "imageUrl", "status", "ownerId", "approvalStatus"];
 
 const pickFields = (source, fields) => {
   const data = {};
@@ -15,8 +14,6 @@ const pickFields = (source, fields) => {
   return data;
 };
 
-const isOwnerOfCar = (car, userId) => String(car.ownerId) === String(userId);
-
 exports.getCars = async (req, res) => {
   const cars = await Car.find({ approvalStatus: "APPROVED" }).sort({ createdAt: -1 });
   res.json(cars);
@@ -24,20 +21,13 @@ exports.getCars = async (req, res) => {
 
 exports.createCar = async (req, res) => {
   try {
-    const payload =
-      req.user.role === ROLE_ADMIN
-        ? pickFields(req.body, ADMIN_ALLOWED_FIELDS)
-        : pickFields(req.body, OWNER_ALLOWED_FIELDS);
-
-    if (req.user.role === ROLE_OWNER) {
-      payload.ownerId = req.user.id;
-      payload.approvalStatus = "APPROVED"; // Auto-approve for owner
+    if (req.user.role !== ROLE_ADMIN) {
+      return res.status(403).json({ message: "Forbidden: Admin only" });
     }
 
-    if (req.user.role === ROLE_ADMIN) {
-      payload.approvalStatus = payload.approvalStatus || "APPROVED";
-      payload.ownerId = payload.ownerId || req.user.id;
-    }
+    const payload = pickFields(req.body, ALLOWED_FIELDS);
+    payload.approvalStatus = payload.approvalStatus || "APPROVED";
+    payload.ownerId = payload.ownerId || req.user.id;
 
     if (!mongoose.Types.ObjectId.isValid(String(payload.ownerId))) {
       return res.status(400).json({ message: "Invalid ownerId" });
@@ -51,6 +41,8 @@ exports.createCar = async (req, res) => {
 };
 
 exports.getMyCars = async (req, res) => {
+  // If no owner role, "My Cars" might not make sense for customers, 
+  // but admins can see all.
   const filter = req.user.role === ROLE_ADMIN ? {} : { ownerId: req.user.id };
   const cars = await Car.find(filter).sort({ createdAt: -1 });
   res.json(cars);
@@ -70,23 +62,16 @@ exports.updateCar = async (req, res) => {
     return res.status(400).json({ message: "Invalid car id" });
   }
 
+  if (req.user.role !== ROLE_ADMIN) {
+    return res.status(403).json({ message: "Forbidden: Admin only" });
+  }
+
   const car = await Car.findById(id);
   if (!car) {
     return res.status(404).json({ message: "Car not found" });
   }
 
-  if (req.user.role === ROLE_OWNER && !isOwnerOfCar(car, req.user.id)) {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-
-  const allowedFields = req.user.role === ROLE_ADMIN ? ADMIN_ALLOWED_FIELDS : OWNER_ALLOWED_FIELDS;
-  const updates = pickFields(req.body, allowedFields);
-
-  if (req.user.role === ROLE_OWNER) {
-    updates.ownerId = req.user.id;
-    updates.approvalStatus = "PENDING";
-  }
-
+  const updates = pickFields(req.body, ALLOWED_FIELDS);
   Object.assign(car, updates);
   await car.save();
 
@@ -99,13 +84,13 @@ exports.deleteCar = async (req, res) => {
     return res.status(400).json({ message: "Invalid car id" });
   }
 
+  if (req.user.role !== ROLE_ADMIN) {
+    return res.status(403).json({ message: "Forbidden: Admin only" });
+  }
+
   const car = await Car.findById(id);
   if (!car) {
     return res.status(404).json({ message: "Car not found" });
-  }
-
-  if (req.user.role === ROLE_OWNER && !isOwnerOfCar(car, req.user.id)) {
-    return res.status(403).json({ message: "Forbidden" });
   }
 
   await car.deleteOne();
@@ -115,6 +100,10 @@ exports.deleteCar = async (req, res) => {
 exports.approveCar = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
+
+  if (req.user.role !== ROLE_ADMIN) {
+    return res.status(403).json({ message: "Forbidden: Admin only" });
+  }
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid car id" });

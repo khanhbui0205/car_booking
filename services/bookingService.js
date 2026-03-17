@@ -76,16 +76,6 @@ exports.getBookingsOfUser = async (userId) => {
     .sort({ createdAt: -1 });
 };
 
-exports.getOwnerBookings = async (ownerId) => {
-  const cars = await Car.find({ ownerId }).select("_id");
-
-  return Booking.find({
-    carId: { $in: cars.map(c => c._id) }
-  })
-    .populate("userId", "name email role")
-    .populate("carId");
-};
-
 exports.cancelBooking = async (bookingId) => {
   const booking = await Booking.findById(bookingId);
   if (!booking) {

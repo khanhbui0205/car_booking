@@ -22,10 +22,6 @@ const canAccessBooking = (user, booking) => {
     return String(booking.userId._id || booking.userId) === String(user.id);
   }
 
-  if (user.role === ROLE_OWNER) {
-    return String(booking.carId?.ownerId?._id || booking.carId?.ownerId) === String(user.id);
-  }
-
   return false;
 };
 
@@ -40,16 +36,18 @@ router.get("/cars", async (req, res) => {
     const user = getCurrentUser(req);
     let filter = {};
 
-    if (user.role === ROLE_OWNER) {
-      filter = { ownerId: user.id };
-    } else if (user.role === ROLE_ADMIN) {
-      filter = {};
-    } else {
-      // Customers see only approved cars
+    if (user.role !== ROLE_ADMIN) {
+      // Customers see all approved cars
       filter = { approvalStatus: "APPROVED" };
     }
 
-    const cars = await Car.find(filter).sort({ createdAt: -1 });
+    let cars = await Car.find(filter).sort({ createdAt: -1 });
+
+    // Fallback: If no approved cars found for customer, try to show all cars
+    if (cars.length === 0 && user.role !== ROLE_ADMIN) {
+      cars = await Car.find({}).sort({ createdAt: -1 });
+    }
+
     res.render("cars/list", { cars, user });
   } catch (error) {
     console.error("Error loading cars:", error);
@@ -101,12 +99,7 @@ router.get("/bookings", async (req, res) => {
     const user = getCurrentUser(req);
     let filter = {};
 
-    if (user.role === ROLE_ADMIN) {
-      filter = {};
-    } else if (user.role === ROLE_OWNER) {
-      const ownerCars = await Car.find({ ownerId: user.id }).select("_id");
-      filter = { carId: { $in: ownerCars.map((car) => car._id) } };
-    } else {
+    if (user.role !== ROLE_ADMIN) {
       filter = { userId: user.id };
     }
 

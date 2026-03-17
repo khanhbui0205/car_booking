@@ -1,9 +1,8 @@
 const ROLE_CUSTOMER = "customer";
-const ROLE_OWNER = "owner";
 const ROLE_ADMIN = "admin";
 const ROLE_LEGACY_USER = "user";
 
-const SUPPORTED_ROLES = [ROLE_CUSTOMER, ROLE_OWNER, ROLE_ADMIN];
+const SUPPORTED_ROLES = [ROLE_CUSTOMER, ROLE_ADMIN];
 
 const normalizeRole = (role) => {
   if (role === ROLE_LEGACY_USER || !role) {
@@ -19,7 +18,6 @@ const normalizeRole = (role) => {
 
 module.exports = {
   ROLE_CUSTOMER,
-  ROLE_OWNER,
   ROLE_ADMIN,
   ROLE_LEGACY_USER,
   SUPPORTED_ROLES,
