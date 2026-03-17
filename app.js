@@ -3,6 +3,7 @@ const express = require("express");
 const connectDB = require("./config/db");
 const path = require("path");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const cors = require("cors");
 
 const app = express();
@@ -11,13 +12,18 @@ app.use(cors());
 // Body parser
 app.use(express.json());
 
-// Session configuration
+// Session configuration with MongoDB store
 app.use(session({
   secret: process.env.SESSION_SECRET || "your-secret-key",
   resave: false,
   saveUninitialized: true,
+  store: new MongoStore({
+    mongoUrl: process.env.MONGO_URI,
+    touchAfter: 24 * 3600 // lazy session update
+  }),
   cookie: { 
-    secure: true, // Set to true if using HTTPS
+    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
@@ -56,16 +62,25 @@ app.get("/", (req, res) => {
 });
 
 
-const https = require("https");
-const fs = require("fs");
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || "development";
 
-const sslOptions = {
-  key: fs.readFileSync("./ssl/server.key"),
-  cert: fs.readFileSync("./ssl/server.cert")
-};
-
-const PORT = 3000;
-
-https.createServer(sslOptions, app).listen(PORT, () => {
-  console.log(`HTTPS Server running at https://localhost:${PORT}`);
-});
+if (NODE_ENV === "production") {
+  // Production: Render handles HTTPS at load balancer
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+} else {
+  // Local development: use HTTPS
+  const https = require("https");
+  const fs = require("fs");
+  
+  const sslOptions = {
+    key: fs.readFileSync("./ssl/server.key"),
+    cert: fs.readFileSync("./ssl/server.cert")
+  };
+  
+  https.createServer(sslOptions, app).listen(PORT, "localhost", () => {
+    console.log(`HTTPS Server running at https://localhost:${PORT}`);
+  });
+}
