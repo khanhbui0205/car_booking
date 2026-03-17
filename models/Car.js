@@ -12,6 +12,11 @@ const carSchema = new mongoose.Schema(
       enum: ["AVAILABLE", "BOOKED"],
       default: "AVAILABLE"
     },
+    approvalStatus: {
+      type: String,
+      enum: ["PENDING", "APPROVED", "REJECTED"],
+      default: "PENDING"
+    },
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"

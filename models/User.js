@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ROLE_ADMIN, ROLE_CUSTOMER, ROLE_LEGACY_USER, ROLE_OWNER } = require("../utils/roles");
 
 const userSchema = new mongoose.Schema(
   {
@@ -7,8 +8,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user"
+      enum: [ROLE_CUSTOMER, ROLE_OWNER, ROLE_ADMIN, ROLE_LEGACY_USER],
+      default: ROLE_CUSTOMER
     }
   },
   { timestamps: true }

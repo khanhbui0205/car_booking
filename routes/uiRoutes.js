@@ -2,57 +2,138 @@ const router = require("express").Router();
 const Car = require("../models/Car");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
+const { normalizeRole, ROLE_ADMIN, ROLE_CUSTOMER, ROLE_OWNER } = require("../utils/roles");
+
+const getCurrentUser = (req) => {
+  if (!req.session || !req.session.user) {
+    return null;
+  }
+
+  req.session.user.role = normalizeRole(req.session.user.role);
+  return req.session.user;
+};
+
+const canAccessBooking = (user, booking) => {
+  if (user.role === ROLE_ADMIN) {
+    return true;
+  }
+
+  if (user.role === ROLE_CUSTOMER) {
+    return String(booking.userId._id || booking.userId) === String(user.id);
+  }
+
+  if (user.role === ROLE_OWNER) {
+    return String(booking.carId?.ownerId?._id || booking.carId?.ownerId) === String(user.id);
+  }
+
+  return false;
+};
 
 // Dashboard
 router.get("/", async (req, res) => {
-  res.render("dashboard", { user: req.session.user });
+  res.render("dashboard", { user: getCurrentUser(req) });
 });
 
 // Cars
 router.get("/cars", async (req, res) => {
-  const cars = await Car.find();
-  res.render("cars/list", { cars, user: req.session.user });
+  const user = getCurrentUser(req);
+  const filter =
+    user.role === ROLE_ADMIN ? {} : user.role === ROLE_OWNER ? { ownerId: user.id } : { approvalStatus: "APPROVED" };
+
+  const cars = await Car.find(filter).sort({ createdAt: -1 });
+  res.render("cars/list", { cars, user });
 });
 
 router.get("/cars/create", (req, res) => {
-  res.render("cars/create", { user: req.session.user });
+  const user = getCurrentUser(req);
+  if (![ROLE_ADMIN, ROLE_OWNER].includes(user.role)) {
+    return res.status(403).redirect("/dashboard");
+  }
+
+  res.render("cars/create", { user });
 });
 
 router.get("/cars/:id", async (req, res) => {
+  const user = getCurrentUser(req);
   const car = await Car.findById(req.params.id);
-  const relatedCars = await Car.find({ _id: { $ne: req.params.id } }).limit(3);
-  res.render("cars/detail", { car, relatedCars, user: req.session.user });
+  if (!car) {
+    return res.status(404).send("Car not found");
+  }
+
+  const canViewCar =
+    user.role === ROLE_ADMIN ||
+    (user.role === ROLE_OWNER && String(car.ownerId) === String(user.id)) ||
+    (user.role === ROLE_CUSTOMER && car.approvalStatus === "APPROVED");
+
+  if (!canViewCar) {
+    return res.status(403).redirect("/ui/cars");
+  }
+
+  const relatedCars = await Car.find({
+    _id: { $ne: req.params.id },
+    approvalStatus: "APPROVED"
+  }).limit(3);
+
+  res.render("cars/detail", { car, relatedCars, user });
 });
 
 // Bookings
 router.get("/bookings", async (req, res) => {
-  const bookings = await Booking.find()
+  const user = getCurrentUser(req);
+  let bookingsQuery;
+
+  if (user.role === ROLE_ADMIN) {
+    bookingsQuery = Booking.find();
+  } else if (user.role === ROLE_OWNER) {
+    const ownerCars = await Car.find({ ownerId: user.id }).select("_id");
+    bookingsQuery = Booking.find({ carId: { $in: ownerCars.map((car) => car._id) } });
+  } else {
+    bookingsQuery = Booking.find({ userId: user.id });
+  }
+
+  const bookings = await bookingsQuery
     .populate("userId")
     .populate("carId");
 
-  res.render("bookings/list", { bookings, user: req.session.user });
+  res.render("bookings/list", { bookings, user });
 });
 
 router.get("/bookings/create", (req, res) => {
-  res.render("bookings/create", { user: req.session.user });
+  const user = getCurrentUser(req);
+  if (user.role !== ROLE_CUSTOMER) {
+    return res.status(403).redirect("/ui/bookings");
+  }
+
+  res.render("bookings/create", { user });
 });
 
 router.get("/bookings/:id", async (req, res) => {
+  const user = getCurrentUser(req);
   const booking = await Booking.findById(req.params.id)
     .populate("userId")
     .populate("carId");
 
-  res.render("bookings/detail", { booking, user: req.session.user });
+  if (!booking) {
+    return res.status(404).send("Booking not found");
+  }
+
+  if (!canAccessBooking(user, booking)) {
+    return res.status(403).redirect("/ui/bookings");
+  }
+
+  res.render("bookings/detail", { booking, user });
 });
 
 // Users (Admin only)
 router.get("/users", async (req, res) => {
-  if (req.session.user.role !== 'admin') {
-    return res.status(403).redirect('/dashboard');
+  const user = getCurrentUser(req);
+
+  if (user.role !== ROLE_ADMIN) {
+    return res.status(403).redirect("/dashboard");
   }
-  
+
   const users = await User.find();
-  res.render("users/list", { users, user: req.session.user });
+  res.render("users/list", { users, user });
 });
 
 module.exports = router;

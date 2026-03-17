@@ -98,9 +98,13 @@
                     <span class="badge badge-confirmed">
                       <i class="fas fa-crown me-1"></i> ADMIN
                     </span>
+                  <% } else if (u.role === "owner") { %>
+                    <span class="badge badge-active">
+                      <i class="fas fa-car me-1"></i> OWNER
+                    </span>
                   <% } else { %>
                     <span class="badge badge-active">
-                      <i class="fas fa-user-check me-1"></i> USER
+                      <i class="fas fa-user-check me-1"></i> CUSTOMER
                     </span>
                   <% } %>
                 </td>
@@ -155,9 +159,9 @@
       <div class="col-md-4">
         <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-left: 4px solid #4caf50;">
           <div class="card-body p-4" style="text-align: center;">
-            <p style="margin: 0; color: #666; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Regular Users</p>
+            <p style="margin: 0; color: #666; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">Owners</p>
             <p style="margin: 10px 0 0 0; font-size: 2.5rem; font-weight: 800; color: #4caf50;">
-              <%= users ? users.filter(u => u.role === 'user').length : 0 %>
+              <%= users ? users.filter(u => u.role === 'owner').length : 0 %>
             </p>
           </div>
         </div>

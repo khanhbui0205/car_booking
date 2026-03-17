@@ -263,7 +263,6 @@ document.getElementById('endDate').addEventListener('change', updateSummary);
 document.getElementById('bookingForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const userId = '<%= user.id %>';
   const carId = document.getElementById('carId').value;
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
@@ -284,8 +283,7 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
     const response = await fetch('/api/bookings', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userId}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         carId,

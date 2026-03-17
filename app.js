@@ -3,9 +3,11 @@ const express = require("express");
 const connectDB = require("./config/db");
 const path = require("path");
 const session = require("express-session");
+const cors = require("cors");
 
 const app = express();
 
+app.use(cors());
 // Body parser
 app.use(express.json());
 
@@ -15,7 +17,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: { 
-    secure: false, // Set to true if using HTTPS
+    secure: true, // Set to true if using HTTPS
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
@@ -53,7 +55,17 @@ app.get("/", (req, res) => {
   res.redirect("/auth/login");
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+
+const https = require("https");
+const fs = require("fs");
+
+const sslOptions = {
+  key: fs.readFileSync("./ssl/server.key"),
+  cert: fs.readFileSync("./ssl/server.cert")
+};
+
+const PORT = 3000;
+
+https.createServer(sslOptions, app).listen(PORT, () => {
+  console.log(`HTTPS Server running at https://localhost:${PORT}`);
 });

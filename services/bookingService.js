@@ -7,6 +7,7 @@ const { calculateTotalPrice } = require("./priceService");
 exports.createBooking = async ({ userId, carId, startDate, endDate }) => {
   const conflict = await Booking.findOne({
     carId,
+    status: { $ne: "CANCELED" },
     startDate: { $lte: new Date(endDate) },
     endDate: { $gte: new Date(startDate) }
   });
@@ -18,6 +19,9 @@ exports.createBooking = async ({ userId, carId, startDate, endDate }) => {
   const car = await Car.findById(carId);
   if (!car) {
     throw new Error("CAR_NOT_FOUND");
+  }
+  if (car.approvalStatus && car.approvalStatus !== "APPROVED") {
+    throw new Error("CAR_NOT_APPROVED");
   }
 
   const totalPrice = calculateTotalPrice(startDate, endDate, car.pricePerDay);
@@ -62,7 +66,7 @@ exports.confirmBooking = async (bookingId) => {
 
 exports.getBookingById = async (id) => {
   return Booking.findById(id)
-    .populate("userId")
+    .populate("userId", "name email role")
     .populate("carId");
 };
 
@@ -78,6 +82,21 @@ exports.getOwnerBookings = async (ownerId) => {
   return Booking.find({
     carId: { $in: cars.map(c => c._id) }
   })
-    .populate("userId")
+    .populate("userId", "name email role")
     .populate("carId");
+};
+
+exports.cancelBooking = async (bookingId) => {
+  const booking = await Booking.findById(bookingId);
+  if (!booking) {
+    throw new Error("BOOKING_NOT_FOUND");
+  }
+
+  if (booking.status === "CANCELED") {
+    throw new Error("BOOKING_ALREADY_CANCELED");
+  }
+
+  booking.status = "CANCELED";
+  await booking.save();
+  return booking;
 };
