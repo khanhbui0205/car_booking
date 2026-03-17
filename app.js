@@ -22,7 +22,7 @@ app.use(session({
     touchAfter: 24 * 3600 // lazy session update
   }),
   cookie: { 
-    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    secure: false, // HTTP không cần HTTPS
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
@@ -33,9 +33,6 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
-
-// Connect MongoDB
-connectDB();
 
 // Auth routes (PUBLIC)
 app.use("/auth", require("./routes/authRoutes"));
@@ -61,26 +58,21 @@ app.get("/", (req, res) => {
   res.redirect("/auth/login");
 });
 
-
+// Start server
 const PORT = process.env.PORT || 3000;
-const NODE_ENV = process.env.NODE_ENV || "development";
 
-if (NODE_ENV === "production") {
-  // Production: Render handles HTTPS at load balancer
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-} else {
-  // Local development: use HTTPS
-  const https = require("https");
-  const fs = require("fs");
-  
-  const sslOptions = {
-    key: fs.readFileSync("./ssl/server.key"),
-    cert: fs.readFileSync("./ssl/server.cert")
-  };
-  
-  https.createServer(sslOptions, app).listen(PORT, "localhost", () => {
-    console.log(`HTTPS Server running at https://localhost:${PORT}`);
-  });
-}
+const startServer = async () => {
+  try {
+    // Connect MongoDB first
+    await connectDB();
+    
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
