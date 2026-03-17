@@ -88,23 +88,27 @@
           </tr>
         </thead>
         <tbody>
-          <% if (bookings && bookings.length > 0) { %>
+          <% if (typeof bookings !== 'undefined' && bookings && bookings.length > 0) { %>
             <% bookings.forEach(b => { %>
               <tr>
                 <td>
                   <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #0066cc 0%, #1a7fd9 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
-                      <%= b.userId.name.charAt(0).toUpperCase() %>
+                      <%= (b.userId && b.userId.name) ? b.userId.name.charAt(0).toUpperCase() : '?' %>
                     </div>
                     <div>
-                      <strong><%= b.userId.name %></strong><br>
-                      <small style="color: #666;"><%= b.userId.email %></small>
+                      <strong><%= (b.userId && b.userId.name) ? b.userId.name : 'Unknown User' %></strong><br>
+                      <small style="color: #666;"><%= (b.userId && b.userId.email) ? b.userId.email : 'No email' %></small>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <strong><%= b.carId.brand %></strong><br>
-                  <span style="color: #666;"><%= b.carId.model %></span>
+                  <% if (b.carId) { %>
+                    <strong><%= b.carId.brand %></strong><br>
+                    <span style="color: #666;"><%= b.carId.model %></span>
+                  <% } else { %>
+                    <span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Deleted Car</span>
+                  <% } %>
                 </td>
                 <td>
                   <div style="font-size: 0.9rem;">
@@ -116,7 +120,7 @@
                 </td>
                 <td>
                   <div style="font-weight: 800; color: #0066cc; font-size: 1.1rem;">
-                    <%= b.totalPrice %>đ
+                    <%= b.totalPrice ? b.totalPrice.toLocaleString('vi-VN') : 0 %>đ
                   </div>
                 </td>
                 <td>
@@ -145,8 +149,8 @@
             <tr>
               <td colspan="6" style="text-align: center; padding: 60px 20px;">
                 <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc; margin-bottom: 20px; display: block;"></i>
-                <h5 style="color: #999; margin-bottom: 10px;">No Bookings Yet</h5>
-                <p style="color: #bbb; margin-bottom: 20px;">You haven't made any bookings. Start by browsing our cars!</p>
+                <h5 style="color: #999; margin-bottom: 10px;">No Bookings Found</h5>
+                <p style="color: #bbb; margin-bottom: 20px;">We couldn't find any bookings. Start by browsing our cars!</p>
                 <a href="/ui/cars" class="btn btn-primary">
                   <i class="fas fa-search me-2"></i> Browse Cars
                 </a>
@@ -156,6 +160,12 @@
         </tbody>
       </table>
     </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger mt-3">
+        <i class="fas fa-exclamation-circle me-2"></i> Error: <%= error %>
+      </div>
+    <% } %>
   </div>
 </main>
 

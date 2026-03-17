@@ -38,8 +38,16 @@ router.get("/", async (req, res) => {
 router.get("/cars", async (req, res) => {
   try {
     const user = getCurrentUser(req);
-    const filter =
-      user.role === ROLE_ADMIN ? {} : user.role === ROLE_OWNER ? { ownerId: user.id } : { approvalStatus: "APPROVED" };
+    let filter = {};
+
+    if (user.role === ROLE_OWNER) {
+      filter = { ownerId: user.id };
+    } else if (user.role === ROLE_ADMIN) {
+      filter = {};
+    } else {
+      // Customers see only approved cars
+      filter = { approvalStatus: "APPROVED" };
+    }
 
     const cars = await Car.find(filter).sort({ createdAt: -1 });
     res.render("cars/list", { cars, user });
@@ -91,20 +99,21 @@ router.get("/cars/:id", async (req, res) => {
 router.get("/bookings", async (req, res) => {
   try {
     const user = getCurrentUser(req);
-    let bookingsQuery;
+    let filter = {};
 
     if (user.role === ROLE_ADMIN) {
-      bookingsQuery = Booking.find();
+      filter = {};
     } else if (user.role === ROLE_OWNER) {
       const ownerCars = await Car.find({ ownerId: user.id }).select("_id");
-      bookingsQuery = Booking.find({ carId: { $in: ownerCars.map((car) => car._id) } });
+      filter = { carId: { $in: ownerCars.map((car) => car._id) } };
     } else {
-      bookingsQuery = Booking.find({ userId: user.id });
+      filter = { userId: user.id };
     }
 
-    const bookings = await bookingsQuery
+    const bookings = await Booking.find(filter)
       .populate("userId", "name email")
-      .populate("carId", "brand model pricePerDay ownerId");
+      .populate("carId", "brand model pricePerDay ownerId")
+      .sort({ createdAt: -1 });
 
     res.render("bookings/list", { bookings, user });
   } catch (error) {

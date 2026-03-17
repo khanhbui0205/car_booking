@@ -57,142 +57,155 @@
       <ol class="breadcrumb" style="background: transparent; padding: 0; margin: 0;">
         <li class="breadcrumb-item"><a href="/dashboard" style="color: #0066cc; text-decoration: none;">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="/ui/bookings" style="color: #0066cc; text-decoration: none;">Bookings</a></li>
-        <li class="breadcrumb-item active">Booking #<%= booking._id.toString().substring(0, 8) %></li>
+        <li class="breadcrumb-item active">Booking #<%= booking && booking._id ? booking._id.toString().substring(0, 8) : 'Unknown' %></li>
       </ol>
     </nav>
 
-    <!-- Main Card -->
-    <div class="card card-custom p-0">
-      <div style="background: linear-gradient(135deg, #0066cc 0%, #1a7fd9 100%); color: white; padding: 30px;">
-        <h3 style="margin: 0;">
-          <i class="fas fa-receipt me-2"></i> Booking Details
-        </h3>
-        <p style="margin: 5px 0 0 0; opacity: 0.9;">Booking ID: #<%= booking._id.toString().substring(0, 12) %></p>
+    <% if (!booking) { %>
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i> Booking not found.
       </div>
-
-      <div class="card-body p-4">
-        <!-- Status -->
-        <div style="background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #0066cc; margin-bottom: 30px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <p style="margin: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; font-weight: 600;">Booking Status</p>
-              <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 800; color: #0066cc;">
-                <% if (booking.status === "ACTIVE") { %>
-                  <i class="fas fa-hourglass-end me-2"></i> ACTIVE
-                <% } else if (booking.status === "CONFIRMED") { %>
-                  <i class="fas fa-check-circle me-2"></i> CONFIRMED
-                <% } else { %>
-                  <i class="fas fa-times-circle me-2"></i> CANCELLED
-                <% } %>
-              </p>
-            </div>
-            <div style="text-align: right;">
-              <p style="margin: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; font-weight: 600;">Total Price</p>
-              <p style="margin: 5px 0 0 0; font-size: 1.8rem; font-weight: 800; color: #0066cc;">
-                <%= booking.totalPrice %>đ
-              </p>
-            </div>
-          </div>
+      <a href="/ui/bookings" class="btn btn-primary">Back to Bookings</a>
+    <% } else { %>
+      <!-- Main Card -->
+      <div class="card card-custom p-0">
+        <div style="background: linear-gradient(135deg, #0066cc 0%, #1a7fd9 100%); color: white; padding: 30px;">
+          <h3 style="margin: 0;">
+            <i class="fas fa-receipt me-2"></i> Booking Details
+          </h3>
+          <p style="margin: 5px 0 0 0; opacity: 0.9;">Booking ID: #<%= booking._id.toString().substring(0, 12) %></p>
         </div>
 
-        <!-- Guest Information -->
-        <div class="mb-4">
-          <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 15px;">
-            <i class="fas fa-user-circle me-2"></i> Guest Information
-          </h5>
-          <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-user me-2" style="color: #0066cc;"></i> Name
-              </label>
-              <span><strong><%= booking.userId.name %></strong></span>
-            </div>
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-envelope me-2" style="color: #0066cc;"></i> Email
-              </label>
-              <span><%= booking.userId.email %></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Vehicle Information -->
-        <div class="mb-4">
-          <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 15px;">
-            <i class="fas fa-car me-2"></i> Vehicle Information
-          </h5>
-          <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-cube me-2" style="color: #0066cc;"></i> Brand
-              </label>
-              <span><strong><%= booking.carId.brand %></strong></span>
-            </div>
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-car-side me-2" style="color: #0066cc;"></i> Model
-              </label>
-              <span><strong><%= booking.carId.model %></strong></span>
-            </div>
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-dollar-sign me-2" style="color: #0066cc;"></i> Price Per Day
-              </label>
-              <span style="color: #0066cc; font-weight: 800;"><%= booking.carId.pricePerDay %>đ</span>
+        <div class="card-body p-4">
+          <!-- Status -->
+          <div style="background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #0066cc; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <p style="margin: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; font-weight: 600;">Booking Status</p>
+                <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 800; color: #0066cc;">
+                  <% if (booking.status === "ACTIVE") { %>
+                    <i class="fas fa-hourglass-end me-2"></i> ACTIVE
+                  <% } else if (booking.status === "CONFIRMED") { %>
+                    <i class="fas fa-check-circle me-2"></i> CONFIRMED
+                  <% } else { %>
+                    <i class="fas fa-times-circle me-2"></i> CANCELLED
+                  <% } %>
+                </p>
+              </div>
+              <div style="text-align: right;">
+                <p style="margin: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; font-weight: 600;">Total Price</p>
+                <p style="margin: 5px 0 0 0; font-size: 1.8rem; font-weight: 800; color: #0066cc;">
+                  <%= booking.totalPrice ? booking.totalPrice.toLocaleString('vi-VN') : 0 %>đ
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Booking Dates -->
-        <div class="mb-4">
-          <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 15px;">
-            <i class="fas fa-calendar-alt me-2"></i> Rental Dates
-          </h5>
-          <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-calendar-check me-2" style="color: #0066cc;"></i> Start Date
-              </label>
-              <span><strong><%= new Date(booking.startDate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></strong></span>
-            </div>
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-calendar-times me-2" style="color: #0066cc;"></i> End Date
-              </label>
-              <span><strong><%= new Date(booking.endDate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></strong></span>
-            </div>
-            <div class="detail-row">
-              <label>
-                <i class="fas fa-clock me-2" style="color: #0066cc;"></i> Duration
-              </label>
-              <span>
-                <% const days = Math.ceil((new Date(booking.endDate) - new Date(booking.startDate)) / (1000 * 60 * 60 * 24)); %>
-                <strong><%= days %> day<%= days !== 1 ? 's' : '' %></strong>
-              </span>
+          <!-- Guest Information -->
+          <div class="mb-4">
+            <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 15px;">
+              <i class="fas fa-user-circle me-2"></i> Guest Information
+            </h5>
+            <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
+              <div class="detail-row">
+                <label>
+                  <i class="fas fa-user me-2" style="color: #0066cc;"></i> Name
+                </label>
+                <span><strong><%= booking.userId ? booking.userId.name : 'Unknown Guest' %></strong></span>
+              </div>
+              <div class="detail-row">
+                <label>
+                  <i class="fas fa-envelope me-2" style="color: #0066cc;"></i> Email
+                </label>
+                <span><%= booking.userId ? booking.userId.email : 'No email' %></span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Actions -->
-        <div style="display: flex; gap: 12px; margin-top: 30px;">
-          <a href="/ui/bookings" class="btn btn-secondary flex-grow-1">
-            <i class="fas fa-arrow-left me-2"></i> Back to Bookings
-          </a>
-          
-          <% if (booking.status !== "CANCELED") { %>
-            <button id="cancelBtn" class="btn btn-danger flex-grow-1" onclick="cancelBooking('<%= booking._id %>')">
-              <i class="fas fa-times-circle me-2"></i> Cancel Booking
-            </button>
-          <% } %>
+          <!-- Vehicle Information -->
+          <div class="mb-4">
+            <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 15px;">
+              <i class="fas fa-car me-2"></i> Vehicle Information
+            </h5>
+            <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
+              <% if (booking.carId) { %>
+                <div class="detail-row">
+                  <label>
+                    <i class="fas fa-cube me-2" style="color: #0066cc;"></i> Brand
+                  </label>
+                  <span><strong><%= booking.carId.brand %></strong></span>
+                </div>
+                <div class="detail-row">
+                  <label>
+                    <i class="fas fa-car-side me-2" style="color: #0066cc;"></i> Model
+                  </label>
+                  <span><strong><%= booking.carId.model %></strong></span>
+                </div>
+                <div class="detail-row">
+                  <label>
+                    <i class="fas fa-dollar-sign me-2" style="color: #0066cc;"></i> Price Per Day
+                  </label>
+                  <span style="color: #0066cc; font-weight: 800;"><%= booking.carId.pricePerDay.toLocaleString('vi-VN') %>đ</span>
+                </div>
+              <% } else { %>
+                <div class="alert alert-warning m-0">
+                  <i class="fas fa-exclamation-triangle me-2"></i> Associated car has been deleted.
+                </div>
+              <% } %>
+            </div>
+          </div>
 
-          <% if (booking.status === "ACTIVE" && user.role === "admin") { %>
-            <button id="confirmBtn" class="btn btn-success flex-grow-1" onclick="confirmBooking('<%= booking._id %>')">
-              <i class="fas fa-check-circle me-2"></i> Confirm Booking
-            </button>
-          <% } %>
+          <!-- Booking Dates -->
+          <div class="mb-4">
+            <h5 style="color: #0066cc; font-weight: 700; margin-bottom: 15px;">
+              <i class="fas fa-calendar-alt me-2"></i> Rental Dates
+            </h5>
+            <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid #e0e0e0;">
+              <div class="detail-row">
+                <label>
+                  <i class="fas fa-calendar-check me-2" style="color: #0066cc;"></i> Start Date
+                </label>
+                <span><strong><%= new Date(booking.startDate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></strong></span>
+              </div>
+              <div class="detail-row">
+                <label>
+                  <i class="fas fa-calendar-times me-2" style="color: #0066cc;"></i> End Date
+                </label>
+                <span><strong><%= new Date(booking.endDate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></strong></span>
+              </div>
+              <div class="detail-row">
+                <label>
+                  <i class="fas fa-clock me-2" style="color: #0066cc;"></i> Duration
+                </label>
+                <span>
+                  <% const days = Math.ceil((new Date(booking.endDate) - new Date(booking.startDate)) / (1000 * 60 * 60 * 24)); %>
+                  <strong><%= days %> day<%= days !== 1 ? 's' : '' %></strong>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display: flex; gap: 12px; margin-top: 30px;">
+            <a href="/ui/bookings" class="btn btn-secondary flex-grow-1">
+              <i class="fas fa-arrow-left me-2"></i> Back to Bookings
+            </a>
+            
+            <% if (booking.status !== "CANCELED") { %>
+              <button id="cancelBtn" class="btn btn-danger flex-grow-1" onclick="cancelBooking('<%= booking._id %>')">
+                <i class="fas fa-times-circle me-2"></i> Cancel Booking
+              </button>
+            <% } %>
+
+            <% if (booking.status === "ACTIVE" && user.role === "admin") { %>
+              <button id="confirmBtn" class="btn btn-success flex-grow-1" onclick="confirmBooking('<%= booking._id %>')">
+                <i class="fas fa-check-circle me-2"></i> Confirm Booking
+              </button>
+            <% } %>
+          </div>
         </div>
       </div>
-    </div>
+    <% } %>
   </div>
 </main>
 
@@ -219,7 +232,6 @@ async function confirmBooking(bookingId) {
 
     if (response.ok) {
       alert('Booking confirmed successfully!');
-      document.getElementById('confirmBtn').style.display = 'none';
       location.reload();
     } else {
       const error = await response.json();
